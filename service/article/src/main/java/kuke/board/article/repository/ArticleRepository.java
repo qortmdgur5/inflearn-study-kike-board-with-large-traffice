@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
 
+    // 페이징 처리를 구현한 findAll
+    // limit 과 offset 을 이용한 페이지 버튼 형식 쿼리
     @Query(
             value = "select article.article_id, article.title, article.content, article.board_id, article.writer_id, " +
                     "article.created_at, article.modified_at " +
@@ -36,4 +38,28 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     )
     Long count(@Param("boardId") Long boardId ,@Param("limit") Long limit);
 
+    // 무한 스크롤 형식 Article 데이터 가져오기 - 첫 데이터
+    @Query(
+            value = "select article.article_id, article.title, article.content, article.board_id, article.writer_id, " +
+                    "article.created_at, article.modified_at " +
+                    "from article " +
+                    "where board_id = :boardId " +
+                    "order by article_id desc limit :limit",
+            nativeQuery = true
+    )
+    List<Article> findAllInfiniteScroll(@Param("boardId") Long boardId,
+                                        @Param("limit") Long limit);
+
+    // 무한 스크롤 형식 Article 데이터 가져오기 - 마지막 기준점 데이터
+    @Query(
+            value = "select article.article_id, article.title, article.content, article.board_id, article.writer_id, " +
+                    "article.created_at, article.modified_at " +
+                    "from article " +
+                    "where board_id = :boardId and article_id < :lastArticleId " +
+                    "order by article_id desc limit :limit",
+            nativeQuery = true
+    )
+    List<Article> findAllInfiniteScroll(@Param("boardId") Long boardId,
+                                        @Param("limit") Long limit,
+                                        @Param("lastArticleId") Long lastArticleId);
 }
