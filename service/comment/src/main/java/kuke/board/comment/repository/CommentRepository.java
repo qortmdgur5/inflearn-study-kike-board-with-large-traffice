@@ -10,7 +10,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     // parentCommentId 에 해당하는 대댓글 갯수 가져오기 쿼리
     @Query(
             value = "select count(*) from (" +
-                    "   select article_id from article " +
+                    "   select article_id from `comment` " +
                     "   where article_id = :articleId and parent_comment_id = :parentCommentId " +
                     "   limit :limit" +
                     ") t",
