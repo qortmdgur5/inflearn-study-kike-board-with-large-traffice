@@ -3,12 +3,14 @@ package kuke.board.comment.service;
 import kuke.board.comment.entity.Comment;
 import kuke.board.comment.repository.CommentRepository;
 import kuke.board.comment.service.request.CommentCreateRequest;
+import kuke.board.comment.service.response.CommentPageResponse;
 import kuke.board.comment.service.response.CommentResponse;
 import kuke.board.common.snowflake.Snowflake;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 @Service
@@ -83,5 +85,27 @@ public class CommentService {
                     .filter(Predicate.not(this::hasChildren))           // 루트 댓글의 다른 자식 댓글이 더 없다면
                     .ifPresent(this::delete);                           // 루트 댓글 삭제여부 true & 자식댓글 존재 X 인 댓글이 존재 한다면 이것도 삭제
         }
+    }
+
+    // Comment 페이징 처리 전체 데이터 가져오기 - 현재 페이지 영역 ex 1-10 페이지 의 전체 데이터 갯수 까지
+    public CommentPageResponse readAll(Long articleId, Long page, Long pageSize){
+        return CommentPageResponse.of(
+                // 해당 페이지 Comment 댓글 전부 가져오기
+                commentRepository.findAll(articleId, (page - 1) * pageSize, pageSize).stream()
+                        .map(CommentResponse::from)
+                        .toList(),
+                // 해당 페이지 영역 1-10 의 전체 데이터 갯수
+                commentRepository.count(articleId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
+        );
+    }
+
+    // Comment 무한 스크롤 형식 전체 데이터 가져오기
+    public List<CommentResponse> readAll(Long articleId, Long lastParentCommentId, Long lastCommentId, Long limit){
+        List<Comment> comments = lastParentCommentId == null || lastCommentId == null ?
+            commentRepository.findAllInfiniteScroll(articleId, limit) :
+            commentRepository.findAllInfiniteScroll(articleId, lastParentCommentId, lastCommentId, limit);
+        return comments.stream()
+                .map(CommentResponse::from)
+                .toList();
     }
 }
