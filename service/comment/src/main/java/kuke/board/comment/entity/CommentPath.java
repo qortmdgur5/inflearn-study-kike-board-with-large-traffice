@@ -63,12 +63,10 @@ public class CommentPath {
     // 자식댓글 path 생성 메서드
     public CommentPath createChildCommentPath(String descendantsTopPath) {
         if(descendantsTopPath == null){
-            // 자식댓글 중에 자식댓글을 가지고 있는 댓글이 없을때
-            // 즉, 부모를 기준으로 2 depth 밑에 댓글이 존재하지 않을때
-            return CommentPath.create(path + MIN_CHUNK);    // path + 00000 으로 자식 path 설정 - 최초 자식 댓글
+            // 자식댓글이 아예 없을때
+            return CommentPath.create(path + MIN_CHUNK);    // path + 00000 으로 자식 path 설정 - 자식 댓글
         }
 
-        // 부모를 기준으로 2depth 밑에 댓글이 존재할때 - descendantsTopPath 존재할 때
         String childrenTopPath = findChildrenTopPath(descendantsTopPath);   // 해당 부모댓글 자식 댓글중의 최하위 자식댓글 path
         return CommentPath.create(increase(childrenTopPath));               // 최상위 자식댓글 path + 1 로 create
     }
