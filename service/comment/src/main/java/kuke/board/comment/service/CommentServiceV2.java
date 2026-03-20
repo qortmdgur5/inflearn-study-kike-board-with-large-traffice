@@ -1,16 +1,17 @@
 package kuke.board.comment.service;
 
-import kuke.board.comment.entity.Comment;
 import kuke.board.comment.entity.CommentPath;
 import kuke.board.comment.entity.CommentV2;
 import kuke.board.comment.repository.CommentRepositoryV2;
 import kuke.board.comment.service.request.CommentCreateRequestV2;
+import kuke.board.comment.service.response.CommentPageResponse;
 import kuke.board.comment.service.response.CommentResponse;
 import kuke.board.common.snowflake.Snowflake;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import static java.util.function.Predicate.not;
@@ -86,5 +87,24 @@ public class CommentServiceV2 {
                     .filter(Predicate.not(this::hasChildren))           // 루트 댓글의 다른 자식 댓글이 더 없다면
                     .ifPresent(this::delete);                           // 루트 댓글 삭제여부 true & 자식댓글 존재 X 인 댓글이 존재 한다면 이것도 삭제
         }
+    }
+
+    public CommentPageResponse readAll(Long articleId, Long page, Long pageSize) {
+        return CommentPageResponse.of(
+            commentRepositoryV2.findAll(articleId, (page - 1)*pageSize, pageSize).stream()
+                    .map(CommentResponse::from)
+                    .toList(),
+            commentRepositoryV2.count(articleId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
+        );
+    }
+
+    public List<CommentResponse> readAllInfiniteScroll(Long articleId, String lastPath, Long pageSize) {
+        List<CommentV2> comments = lastPath == null ?
+                commentRepositoryV2.findAllInfiniteScroll(articleId, pageSize) :
+                commentRepositoryV2.findAllInfiniteScroll(articleId, lastPath, pageSize);
+
+        return comments.stream()
+                .map(CommentResponse::from)
+                .toList();
     }
 }
