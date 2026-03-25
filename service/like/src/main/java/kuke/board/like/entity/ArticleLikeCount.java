@@ -1,5 +1,6 @@
 package kuke.board.like.entity;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
@@ -11,6 +12,7 @@ import lombok.ToString;
 @Table(name = "article_like_count")
 @Getter
 @ToString
+@Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ArticleLikeCount {
     @Id

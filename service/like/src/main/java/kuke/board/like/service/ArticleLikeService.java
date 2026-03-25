@@ -120,4 +120,11 @@ public class ArticleLikeService {
                         articleLikeCount.decrease();
                 });
     }
+
+    // 좋아요 수 가져오기 서비스
+    public Long count(Long articleId) {
+        return articleLikeCountRepository.findById(articleId)
+                .map(ArticleLikeCount::getLikeCount)
+                .orElse(0L);
+    }
 }
