@@ -25,7 +25,7 @@ public class ArticleLikeController {
             @PathVariable("articleId") Long articleId,
             @PathVariable("userId") Long userId
     ) {
-        articleLikeService.like(articleId, userId);
+//        articleLikeService.like(articleId, userId);
     }
 
     // 해당 게시글 해당 유저가 좋아요 취소 수행 컨트롤러
@@ -34,6 +34,6 @@ public class ArticleLikeController {
             @PathVariable("articleId") Long articleId,
             @PathVariable("userId") Long userId
     ) {
-        articleLikeService.unlike(articleId, userId);
+//        articleLikeService.unlike(articleId, userId);
     }
 }
