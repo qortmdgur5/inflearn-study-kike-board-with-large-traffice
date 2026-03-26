@@ -58,5 +58,9 @@ public class ArticleController {
         articleService.delete(articleId);
     }
 
-
+    // boardId 에 달린 게시글 count 조회
+    @GetMapping("/v1/articles/boards/{boardId}/count")
+    public Long count(@PathVariable(name = "boardId") Long boardId){
+        return articleService.count(boardId);
+    }
 }
