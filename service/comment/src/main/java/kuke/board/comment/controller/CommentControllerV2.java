@@ -54,4 +54,12 @@ public class CommentControllerV2 {
     ) {
         return commentService.readAllInfiniteScroll(articleId, lastPath, pageSize);
     }
+
+    // 해당 게시글 댓글 count 조회 컨트롤러
+    @GetMapping("/v2/comments/articles/{articleId}/count")
+    public Long count(
+            @PathVariable("articleId") Long articleId
+    ) {
+        return commentService.count(articleId);
+    }
 }
