@@ -29,6 +29,8 @@ allprojects {
 	}
 
 	dependencies {
+		implementation 'ch.qos.logback:logback-classic'
+
 		implementation 'org.springframework.boot:spring-boot-starter-web'
 
 		compileOnly 'org.projectlombok:lombok'
