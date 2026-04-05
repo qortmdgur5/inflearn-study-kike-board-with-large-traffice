@@ -24,6 +24,7 @@ public class HotArticleListRepository {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
+    // 인기글 점수 배열 추가
     public void add(Long articleId, LocalDateTime time, Long score, Long limit, Duration ttl) {
         redisTemplate.executePipelined((RedisCallback<?>) action -> {
             StringRedisConnection conn = (StringRedisConnection) action;
