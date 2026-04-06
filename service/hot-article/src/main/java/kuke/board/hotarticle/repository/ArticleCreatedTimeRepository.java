@@ -42,6 +42,10 @@ public class ArticleCreatedTimeRepository {
         );
     }
 
+    public void delete(Long articleId) {
+        redisTemplate.delete(generateKey(articleId));
+    }
+
     private String generateKey(Long articleId) {
         return KEY_FORMAT.formatted(articleId);
     }
