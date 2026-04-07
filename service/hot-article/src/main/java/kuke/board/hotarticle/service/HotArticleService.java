@@ -6,11 +6,13 @@ import kuke.board.common.event.EventType;
 import kuke.board.hotarticle.client.ArticleClient;
 import kuke.board.hotarticle.repository.HotArticleListRepository;
 import kuke.board.hotarticle.service.eventhandler.EventHandler;
+import kuke.board.hotarticle.service.response.HotArticleResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -45,5 +47,14 @@ public class HotArticleService {
 
     private boolean isArticleCreatedOrDeleted(Event<EventPayload> event) {
         return event.getType() == EventType.ARTICLE_CREATED || event.getType() == EventType.ARTICLE_DELETED;
+    }
+
+    // 인기글 조회 서비스
+    public List<HotArticleResponse> readAll(String dateStr) {
+        return hotArticleListRepository.readAll(dateStr).stream()
+                .map(articleClient::read)
+                .filter(Objects::nonNull)
+                .map(HotArticleResponse::from)
+                .toList();
     }
 }
