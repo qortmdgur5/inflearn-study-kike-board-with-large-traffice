@@ -1,5 +1,9 @@
 package kuke.board.like.service;
 
+import kuke.board.common.event.EventType;
+import kuke.board.common.event.payload.ArticleLikedEventPayload;
+import kuke.board.common.event.payload.ArticleUnlikedEventPayload;
+import kuke.board.common.outboxmessagerelay.OutboxEventPublisher;
 import kuke.board.common.snowflake.Snowflake;
 import kuke.board.like.entity.ArticleLike;
 import kuke.board.like.entity.ArticleLikeCount;
@@ -16,6 +20,7 @@ public class ArticleLikeService {
     private final Snowflake snowflake = new Snowflake();
     private final ArticleLikeRepository articleLikeRepository;
     private final ArticleLikeCountRepository  articleLikeCountRepository;
+    private final OutboxEventPublisher outboxEventPublisher;
 
     // 해당 게시물에 해당 유저가 좋아요를 했는지 여부 읽어오기
     public ArticleLikeResponse read(Long articleId, Long userId) {
@@ -31,7 +36,7 @@ public class ArticleLikeService {
     @Transactional
     public void likePessimisticLock1(Long articleId, Long userId) {
         // 좋아요 중간 매핑 테이블 실제 로우 데이터 삽입
-        articleLikeRepository.save(
+        ArticleLike articleLike = articleLikeRepository.save(
                 ArticleLike.create(
                         snowflake.nextId(),
                         articleId,
@@ -49,6 +54,19 @@ public class ArticleLikeService {
                     ArticleLikeCount.init(articleId, 1L)
             );
         }
+
+        // 카프카 이벤트 발행
+        outboxEventPublisher.publish(
+                EventType.ARTICLE_LIKED,
+                ArticleLikedEventPayload.builder()
+                        .articleLikedId(articleLike.getArticleId())
+                        .articleId(articleLike.getArticleId())
+                        .userId(articleLike.getUserId())
+                        .createdAt(articleLike.getCreatedAt())
+                        .articleLikeCount(count(articleLike.getArticleId()))
+                        .build(),
+                articleLike.getArticleId()
+        );
     }
 
     // 좋아요 취소 서비스 메서드
@@ -58,6 +76,18 @@ public class ArticleLikeService {
                 .ifPresent(articleLike ->{
                     articleLikeRepository.delete(articleLike);
                     articleLikeCountRepository.decrease(articleId);
+                    // 카프카 이벤트 발행
+                    outboxEventPublisher.publish(
+                            EventType.ARTICLE_UNLIKED,
+                            ArticleUnlikedEventPayload.builder()
+                                    .articleLikedId(articleLike.getArticleId())
+                                    .articleId(articleLike.getArticleId())
+                                    .userId(articleLike.getUserId())
+                                    .createdAt(articleLike.getCreatedAt())
+                                    .articleLikeCount(count(articleLike.getArticleId()))
+                                    .build(),
+                            articleLike.getArticleId()
+                    );
                 });
     }
 
