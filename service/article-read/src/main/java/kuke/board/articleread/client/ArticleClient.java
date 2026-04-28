@@ -17,7 +17,7 @@ import java.util.Optional;
 public class ArticleClient {
     private RestClient restClient;
 
-    @Value("${endpoints.kuke-board-article-service.url}")
+    @Value("${endpoints.kuke-board-article-service.uri}")
     private String articleServiceUrl;
 
     @PostConstruct

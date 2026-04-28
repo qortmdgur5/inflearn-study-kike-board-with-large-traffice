@@ -14,7 +14,7 @@ import org.springframework.web.client.RestClient;
 public class ViewClient {
     private RestClient restClient;
 
-    @Value("${endpoints.kuke-board-view-service.url}")
+    @Value("${endpoints.kuke-board-view-service.uri}")
     private String viewServiceUrl;
 
     @PostConstruct
